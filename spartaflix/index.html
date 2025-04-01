@@ -4,13 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>스파르타플릭스</title>
+    <!-- jQuery import -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <!-- 부트스트랩 -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
       integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
       crossorigin="anonymous"
     />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap");
 
@@ -58,6 +60,52 @@
         width: 100%;
       }
     </style>
+    <script>
+      $(document).ready(function () {
+        let url = "http://spartacodingclub.shop/sparta_api/weather/seoul";
+        fetch(url)
+          .then((res) => res.json())
+          .then((data) => {
+            let temp = data["temp"];
+            $("#tempmsg").text(temp);
+          });
+      });
+
+      function openclose() {
+        $("#postingbox").toggle();
+      }
+
+      function makeCard() {
+        let image = $("#image").val();
+        let title = $("#title").val();
+        let star = $("#star").val();
+        let comment = $("#comment").val();
+
+        // 별 선택 안하면, 기록 안됨
+        if (star === "별점선택") {
+          alert("별점을 선택해주세요!");
+          return;
+        }
+
+        let temp_html = `
+        <div class="col">
+          <div class="card h-100">
+            <img
+              src="${image}"
+              class="card-img-top"
+              alt="..."
+            />
+            <div class="card-body">
+              <h5 class="card-title">${title}</h5>
+              <p class="card-text">${star}</p>
+              <p class="card-text">${comment}</p>
+            </div>
+          </div>
+        </div>`;
+
+        $("#card").append(temp_html);
+      }
+    </script>
   </head>
 
   <body>
@@ -93,6 +141,11 @@
             <li>
               <a href="#" class="nav-link px-2 text-white">내가 찜한 콘텐츠</a>
             </li>
+            <li>
+              <a href="#" class="nav-link px-2 text-white">
+                현재 서울의 날씨 : <span id="tempmsg">0</span>도
+              </a>
+            </li>
           </ul>
 
           <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
@@ -122,7 +175,11 @@
             역병에 신음하는 산하. 정체 모를 악에 맞서 백성을 구원할 희망은 오직
             세자뿐이다.
           </p>
-          <button type="button" class="btn btn-outline-light">
+          <button
+            type="button"
+            class="btn btn-outline-light"
+            onclick="openclose()"
+          >
             영화 기록하기
           </button>
           <button type="button" class="btn btn-outline-light">상세정보</button>
@@ -130,13 +187,14 @@
       </div>
     </div>
 
-    <div class="mypostingbox">
+    <div class="mypostingbox" id="postingbox" style="display: none">
       <div class="form-floating mb-3">
         <input
           type="email"
           class="form-control"
-          id="floatingInput"
+          id="image"
           placeholder="영화 이미지 주소"
+          value="https://t1.daumcdn.net/movie/43b78cde98431700e717960351d94206e6ea4553"
         />
         <label for="floatingInput">영화 이미지 주소</label>
       </div>
@@ -144,36 +202,38 @@
         <input
           type="email"
           class="form-control"
-          id="floatingInput"
+          id="title"
           placeholder="영화 제목"
         />
         <label for="floatingInput">영화 제목</label>
       </div>
       <div class="input-group mb-3">
         <label class="input-group-text" for="inputGroupSelect01">별점</label>
-        <select class="form-select">
+        <select class="form-select" id="star">
           <option selected>별점선택</option>
-          <option value="1">⭐</option>
-          <option value="2">⭐⭐</option>
-          <option value="3">⭐⭐⭐</option>
-          <option value="4">⭐⭐⭐⭐</option>
-          <option value="5">⭐⭐⭐⭐⭐</option>
+          <option value="⭐">⭐</option>
+          <option value="⭐⭐">⭐⭐</option>
+          <option value="⭐⭐⭐">⭐⭐⭐</option>
+          <option value="⭐⭐⭐⭐">⭐⭐⭐⭐</option>
+          <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐</option>
         </select>
       </div>
       <div class="form-floating mb-3">
         <input
           type="email"
           class="form-control"
-          id="floatingInput"
+          id="comment"
           placeholder="추천 이유"
         />
         <label for="floatingInput">추천 이유</label>
       </div>
-      <button type="button" class="btn btn-danger">기록하기</button>
+      <button type="button" class="btn btn-danger" onclick="makeCard()">
+        기록하기
+      </button>
     </div>
 
     <div class="mycards">
-      <div class="row row-cols-1 row-cols-md-4 g-4">
+      <div id="card" class="row row-cols-1 row-cols-md-4 g-4">
         <div class="col">
           <div class="card h-100">
             <img
