@@ -60,22 +60,30 @@
         width: 100%;
       }
     </style>
-    <script>
-      $(document).ready(function () {
-        let url = "http://spartacodingclub.shop/sparta_api/weather/seoul";
-        fetch(url)
-          .then((res) => res.json())
-          .then((data) => {
-            let temp = data["temp"];
-            $("#tempmsg").text(temp);
-          });
-      });
+    <script type="module">
+      // Firebase
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import {
+        collection,
+        addDoc,
+      } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      import { getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-      function openclose() {
-        $("#postingbox").toggle();
-      }
+      const firebaseConfig = {
+        apiKey: "",
+        authDomain: "",
+        projectId: "",
+        storageBucket: "",
+        messagingSenderId: "",
+        appId: "",
+      };
 
-      function makeCard() {
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // DB에 데이터 추가
+      $("#postingbtn").click(async function () {
         let image = $("#image").val();
         let title = $("#title").val();
         let star = $("#star").val();
@@ -86,6 +94,42 @@
           alert("별점을 선택해주세요!");
           return;
         }
+
+        let doc = {
+          image: image,
+          title: title,
+          star: star,
+          comment: comment,
+        };
+        await addDoc(collection(db, "spartaflix"), doc);
+        // 페이지 리로드
+        alert("저장 완료!");
+        window.location.reload();
+      });
+
+      // 서울 날씨 불러오기
+      let url = "http://spartacodingclub.shop/sparta_api/weather/seoul";
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          let temp = data["temp"];
+          $("#tempmsg").text(temp);
+        });
+
+      // 열고 닫기
+      $("#openclose").click(async function () {
+        $("#postingbox").toggle();
+      });
+
+      // DB 데이터 불러오기
+      let docs = await getDocs(collection(db, "spartaflix"));
+      docs.forEach((doc) => {
+        let row = doc.data();
+
+        let image = row["image"];
+        let title = row["title"];
+        let star = row["star"];
+        let comment = row["comment"];
 
         let temp_html = `
         <div class="col">
@@ -104,7 +148,7 @@
         </div>`;
 
         $("#card").append(temp_html);
-      }
+      });
     </script>
   </head>
 
@@ -175,11 +219,7 @@
             역병에 신음하는 산하. 정체 모를 악에 맞서 백성을 구원할 희망은 오직
             세자뿐이다.
           </p>
-          <button
-            type="button"
-            class="btn btn-outline-light"
-            onclick="openclose()"
-          >
+          <button type="button" class="btn btn-outline-light" id="openclose">
             영화 기록하기
           </button>
           <button type="button" class="btn btn-outline-light">상세정보</button>
@@ -227,70 +267,13 @@
         />
         <label for="floatingInput">추천 이유</label>
       </div>
-      <button type="button" class="btn btn-danger" onclick="makeCard()">
+      <button type="button" class="btn btn-danger" id="postingbtn">
         기록하기
       </button>
     </div>
 
     <div class="mycards">
-      <div id="card" class="row row-cols-1 row-cols-md-4 g-4">
-        <div class="col">
-          <div class="card h-100">
-            <img
-              src="https://movie-phinf.pstatic.net/20210728_221/1627440327667GyoYj_JPEG/movie_image.jpg"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <h5 class="card-title">영화 제목</h5>
-              <p class="card-text">⭐⭐⭐</p>
-              <p class="card-text">영화 코멘트</p>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card h-100">
-            <img
-              src="https://movie-phinf.pstatic.net/20210728_221/1627440327667GyoYj_JPEG/movie_image.jpg"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <h5 class="card-title">영화 제목</h5>
-              <p class="card-text">⭐⭐⭐</p>
-              <p class="card-text">영화 코멘트</p>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card h-100">
-            <img
-              src="https://movie-phinf.pstatic.net/20210728_221/1627440327667GyoYj_JPEG/movie_image.jpg"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <h5 class="card-title">영화 제목</h5>
-              <p class="card-text">⭐⭐⭐</p>
-              <p class="card-text">영화 코멘트</p>
-            </div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card h-100">
-            <img
-              src="https://movie-phinf.pstatic.net/20210728_221/1627440327667GyoYj_JPEG/movie_image.jpg"
-              class="card-img-top"
-              alt="..."
-            />
-            <div class="card-body">
-              <h5 class="card-title">영화 제목</h5>
-              <p class="card-text">⭐⭐⭐</p>
-              <p class="card-text">영화 코멘트</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div id="card" class="row row-cols-1 row-cols-md-4 g-4"></div>
     </div>
   </body>
 </html>
